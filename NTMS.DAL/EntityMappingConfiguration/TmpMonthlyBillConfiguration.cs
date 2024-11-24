@@ -4,14 +4,13 @@ using NTMS.Model;
 
 namespace NTMS.DAL.EntityMappingConfiguration
 {
-    public  class TmpMonthlyBillConfiguration : IEntityTypeConfiguration<TmpMonthlyBill>, INtmsMapping
+    public class TmpMonthlyBillConfiguration : IEntityTypeConfiguration<TmpMonthlyBill>, INtmsMapping
     {
         public void Configure(EntityTypeBuilder<TmpMonthlyBill> builder)
         {
-
-            builder.ToTable("tmpMonthlyBills", "dbo");
-
-            builder.HasNoKey();
+            builder
+                   .HasNoKey()
+                   .ToTable("tmpMonthlyBills");
 
             builder.Property(e => e.BillEndDate).HasMaxLength(50);
             builder.Property(e => e.BillStartDate).HasMaxLength(50);

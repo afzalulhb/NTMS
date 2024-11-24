@@ -1,0 +1,90 @@
+﻿ALTER PROCEDURE [dbo].[GetReportByTenantIdAndDateRange]
+(
+    -- Add the parameters for the stored procedure here
+    @TenantId INT,
+    @StartDate DATE,
+    @EndDate DATE
+)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON
+	
+	DECLARE @TenantName				NVARCHAR(MAX),
+			@FlatCode				NVARCHAR(MAX),
+			@ElectricMeterNo        NVARCHAR(MAX),
+			@BillingPeriod			NVARCHAR(50),
+			@ElectricMeterId        INT,
+			@FirstReading           INT,
+			@LastReading            INT,
+			@ConsumedUnit           INT,
+			@IsShop					bit,
+			@ElectricityCharge		decimal,
+			@DemandCharge			decimal,
+			@ServiceCharge			decimal,
+			@PrincipalAmount		decimal,
+			@ElectricityBill		decimal,
+			@VatPercentage			decimal,
+			@VatAmount				decimal,
+			@HouseRent				decimal,
+			@CleanerBill			decimal,
+			@GasBill				decimal,
+			@TotalBill				decimal
+			;
+	
+	SELECT @BillingPeriod = DATENAME(month, @StartDate) ;			
+	SELECT TOP 1 @TenantName = Name FROM Tenants WHERE Id = @TenantId AND IsActive = 1;
+	SELECT TOP 1 @FlatCode = Code, @HouseRent = Rent FROM Flats f JOIN Tenants t ON f.Id = t.Flat_Id WHERE t.Id = @TenantId AND t.IsActive = 1;
+	SELECT TOP 1 @ElectricMeterNo = MeterNumber, @ElectricMeterId = e.Id FROM EMeters e JOIN Flats f ON e.Flat_Id = f.Id JOIN Tenants t ON f.Id = t.Flat_Id WHERE t.Id = @TenantId AND t.IsActive = 1;
+	SELECT @FirstReading = CASE WHEN EXISTS (SELECT 1  FROM EReadings WHERE EMeter_Id = @ElectricMeterId AND StartDate >= @StartDate)
+								THEN (SELECT TOP 1 PreviousReading  FROM EReadings WHERE EMeter_Id = @ElectricMeterId AND StartDate >= @StartDate ORDER BY StartDate)
+								ELSE 0 END ;
+	SELECT @LastReading = CASE WHEN EXISTS (SELECT 1  FROM EReadings WHERE EMeter_Id = @ElectricMeterId AND EndDate <= @EndDate)
+								THEN (SELECT TOP 1 CurrentReading  FROM EReadings WHERE EMeter_Id = @ElectricMeterId AND EndDate <= @EndDate ORDER BY EndDate DESC)
+								ELSE 0 END ;
+	SELECT @ConsumedUnit = @LastReading - @FirstReading;
+	SELECT @IsShop = CASE WHEN CHARINDEX('SHOP', @FlatCode) =1 THEN 1 ELSE 0 END;
+
+	SELECT @ElectricityCharge = CASE WHEN @IsShop = 1 THEN @ConsumedUnit * (SELECT top 1 MinimumCharge FROM EBillingRules)
+									ELSE
+									(ISNULL((SELECT (@ConsumedUnit) * Rate1 FROM EBillingRules WHERE @ConsumedUnit <= To1), 0)
+									+ISNULL((SELECT ((@ConsumedUnit - To1) * Rate2+ To1 * Rate1) FROM EBillingRules WHERE @ConsumedUnit <= To2), 0)
+									+ISNULL((SELECT ((@ConsumedUnit - To2) * Rate3 + (To2-To1) * Rate2 + To1 * Rate1) FROM EBillingRules WHERE @ConsumedUnit <= To3), 0)
+									+ISNULL((SELECT ((@ConsumedUnit - To3) * Rate4 + (To3-To2) * Rate3 + (To2-To1) * Rate2 + To1 * Rate1) FROM EBillingRules WHERE @ConsumedUnit > To3), 0))
+									END
+									
+	SELECT TOP 1 @CleanerBill = Cost FROM UtilityOptions WHERE [Name] = 'Cleaner';
+	SELECT TOP 1 @GasBill = Cost FROM UtilityOptions WHERE [Name] = 'Gas';
+	
+	SELECT TOP 1 @DemandCharge = DemandCharge, @ServiceCharge = ServiceCharge, @VatPercentage = Vat From EBillingRules;
+	SELECT @PrincipalAmount =@ElectricityCharge + @DemandCharge + @ServiceCharge;
+	SELECT @VatAmount = ROUND( @PrincipalAmount *@VatPercentage/100, 2);
+	SELECT @ElectricityBill = @PrincipalAmount + @VatAmount;
+	SELECT @TotalBill = @ElectricityBill + @GasBill + @CleanerBill + @HouseRent;
+
+
+    -- Insert statements for procedure here
+    SELECT  
+	ISNULL(@TenantName, '') AS TenantName, 
+	ISNULL(@FlatCode, '') AS FlatCode,
+	ISNULL(@ElectricMeterNo, '') AS ElectricMeterNo ,
+	CONVERT(VARCHAR, @StartDate,103) AS BillStartDate,
+	CONVERT(VARCHAR, @EndDate,103) AS BillEndDate, 
+	CONVERT(VARCHAR(10), @BillingPeriod) AS BillingPeriod,
+	CONVERT(VARCHAR(10), @LastReading) AS ElectricMeterCurrentReading,
+	CONVERT(VARCHAR(10), @FirstReading) AS ElectricMeterPreviousReading ,
+	CONVERT(VARCHAR(10), @ConsumedUnit) AS ConsumedElectricUnit ,
+	FORMAT(@ElectricityCharge,'N')  AS ElectricityCharge ,
+	FORMAT(@DemandCharge,'N')  AS DemandCharge ,
+	FORMAT(@ServiceCharge,'N')  AS MeterRent ,
+	FORMAT(@PrincipalAmount,'N')  AS PrincipalAmount ,
+	FORMAT(@VatAmount,'N')  AS Vat ,
+	FORMAT(@ElectricityBill,'N')  AS ElectricityBill ,
+	FORMAT(@HouseRent,'N')  AS HouseRent ,
+	FORMAT(@GasBill,'N')  AS GasBill, 
+	FORMAT(@CleanerBill,'N')  AS CleanerBill ,
+	FORMAT(@TotalBill,'N')  AS Total 
+	--FROM #Results
+END
+GO

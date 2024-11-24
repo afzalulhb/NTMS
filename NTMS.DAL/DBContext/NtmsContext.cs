@@ -4,7 +4,7 @@ using NTMS.Model;
 
 namespace NTMS.DAL.DBContext;
 
-public partial class NtmsContext : DbContext
+public class NtmsContext : DbContext
 {
     public NtmsContext()
     {
@@ -35,10 +35,11 @@ public partial class NtmsContext : DbContext
 
     public virtual DbSet<Wreading> Wreadings { get; set; }
 
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(EmeterConfiguration).Assembly, t => typeof(INtmsMapping).IsAssignableFrom(t));
-        base.OnModelCreating(modelBuilder);
     }
+
 }

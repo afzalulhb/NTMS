@@ -1,4 +1,10 @@
-﻿namespace NTMS.DAL.EntityMappingConfiguration
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NTMS.DAL.EntityMappingConfiguration
 {
     public interface INtmsMapping
     {

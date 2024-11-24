@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace NTMS.Utility
 {
-    public class AytoMapperProfile:Profile
+    public class AytoMapperProfile : Profile
     {
         public AytoMapperProfile()
         {
@@ -18,7 +18,7 @@ namespace NTMS.Utility
             #region Tenant
             CreateMap<Tenant, TenantDTO>().ForMember(dest => dest.StartDate, opt => opt.MapFrom(origin => origin.StartDate.ToString("dd/MM/yyyy")))
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(origin => origin.IsActive == true ? 1 : 0))
-                .ForMember(dest => dest.FlatDescription, opt=>opt.MapFrom(origin=>origin.Flat.Code));
+                .ForMember(dest => dest.FlatDescription, opt => opt.MapFrom(origin => origin.Flat.Code));
 
             CreateMap<TenantDTO, Tenant>().ForMember(dest => dest.IsActive, opt => opt.MapFrom(origin => origin.IsActive == 1 ? true : false));
 
@@ -37,13 +37,20 @@ namespace NTMS.Utility
             #region Ereading
             CreateMap<Ereading, EreadingDTO>().ForMember(dest => dest.StartDate, opt => opt.MapFrom(origin => origin.StartDate.ToString("dd/MM/yyyy")))
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(origin => origin.EndDate.ToString("dd/MM/yyyy")))
-                .ForMember(dest=>dest.EmeterNumber,opt=>opt.MapFrom(origin=>Convert.ToString(origin.Emeter.MeterNumber, new CultureInfo("en-US"))));
+                .ForMember(dest => dest.EmeterNumber, opt => opt.MapFrom(origin => Convert.ToString(origin.Emeter.MeterNumber, new CultureInfo("en-US"))));
 
             CreateMap<EreadingDTO, Ereading>().ForMember(dest => dest.Emeter, opt => opt.Ignore())
           .ForMember(dest => dest.StartDate, opt => opt.MapFrom(origin => Convert.ToDateTime(origin.StartDate)))
           .ForMember(dest => dest.EndDate, opt => opt.MapFrom(origin => Convert.ToDateTime(origin.EndDate)));
 
             #endregion Ereading
+
+            #region Report
+            CreateMap<Report, ReportDTO>()
+                .ForAllMembers(o => o.Condition((src, dest, ValueTask) => ValueTask != null));
+            CreateMap<ReportDTO, Report>()
+                .ForAllMembers(o => o.Condition((src, dest, ValueTask) => ValueTask != null));
+            #endregion Report
         }
 
     }

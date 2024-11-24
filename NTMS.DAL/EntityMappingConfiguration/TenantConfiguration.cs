@@ -4,12 +4,10 @@ using NTMS.Model;
 
 namespace NTMS.DAL.EntityMappingConfiguration
 {
-    public  class TenantConfiguration : IEntityTypeConfiguration<Tenant>, INtmsMapping
+    public class TenantConfiguration : IEntityTypeConfiguration<Tenant>, INtmsMapping
     {
         public void Configure(EntityTypeBuilder<Tenant> builder)
         {
-
-            builder.ToTable("Tenants", "dbo");
             builder.HasKey(e => e.Id).HasName("PK_dbo.Tenants");
 
             builder.HasIndex(e => e.FlatId, "IX_Flat_Id");

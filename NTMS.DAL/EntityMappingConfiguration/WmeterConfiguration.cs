@@ -4,14 +4,13 @@ using NTMS.Model;
 
 namespace NTMS.DAL.EntityMappingConfiguration
 {
-    public  class WmeterConfiguration : IEntityTypeConfiguration<Wmeter>, INtmsMapping
+    public class WmeterConfiguration : IEntityTypeConfiguration<Wmeter>, INtmsMapping
     {
         public void Configure(EntityTypeBuilder<Wmeter> builder)
         {
-
-            builder.ToTable("WMeters", "dbo");
-
             builder.HasKey(e => e.Id).HasName("PK_dbo.WMeters");
+
+            builder.ToTable("WMeters");
 
             builder.HasIndex(e => e.FlatId, "IX_Flat_Id");
 

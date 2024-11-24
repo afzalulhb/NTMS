@@ -4,15 +4,13 @@ using NTMS.Model;
 
 namespace NTMS.DAL.EntityMappingConfiguration
 {
-    public  class EreadingConfiguration : IEntityTypeConfiguration<Ereading>, INtmsMapping
+    public class EreadingConfiguration : IEntityTypeConfiguration<Ereading>, INtmsMapping
     {
         public void Configure(EntityTypeBuilder<Ereading> builder)
         {
-
-            builder.ToTable("EReadings", "dbo");
-
             builder.HasKey(e => e.Id).HasName("PK_dbo.EReadings");
 
+            builder.ToTable("EReadings");
 
             builder.HasIndex(e => e.EmeterId, "IX_EMeter_Id");
 

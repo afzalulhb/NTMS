@@ -25,7 +25,6 @@ namespace NTMS.BLL.Services
                 var query = await _emeterRepository.GetAll();
                 //   var meterList= query.Include(m=>m.Ereadings).ToList();
                 var meterList = query.Include(m => m.Flat).Where(m=>m.IsActive==true);
-                var test = meterList.ToList();
 
                 return _mapper.Map<List<EmeterDTO>>(meterList);
             }

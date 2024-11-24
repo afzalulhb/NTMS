@@ -4,12 +4,10 @@ using NTMS.Model;
 
 namespace NTMS.DAL.EntityMappingConfiguration
 {
-    public  class UtilityOptionConfiguration : IEntityTypeConfiguration<UtilityOption>, INtmsMapping
+    public class UtilityOptionConfiguration : IEntityTypeConfiguration<UtilityOption>, INtmsMapping
     {
         public void Configure(EntityTypeBuilder<UtilityOption> builder)
         {
-
-            builder.ToTable("UtilityOptions", "dbo");
             builder.HasKey(e => e.Id).HasName("PK_dbo.UtilityOptions");
 
             builder.Property(e => e.Cost).HasColumnType("decimal(18, 2)");

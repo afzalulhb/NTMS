@@ -4,12 +4,10 @@ using NTMS.Model;
 
 namespace NTMS.DAL.EntityMappingConfiguration
 {
-    public  class FlatConfiguration : IEntityTypeConfiguration<Flat>, INtmsMapping
+    public class FlatConfiguration : IEntityTypeConfiguration<Flat>, INtmsMapping
     {
         public void Configure(EntityTypeBuilder<Flat> builder)
         {
-
-            builder.ToTable("Flats", "dbo");
             builder.HasKey(e => e.Id).HasName("PK_dbo.Flats");
 
             builder.Property(e => e.Rent).HasColumnType("decimal(18, 2)");

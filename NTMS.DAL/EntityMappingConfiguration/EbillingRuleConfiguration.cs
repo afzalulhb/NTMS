@@ -4,14 +4,14 @@ using NTMS.Model;
 
 namespace NTMS.DAL.EntityMappingConfiguration
 {
-    public  class EbillingRuleConfiguration: IEntityTypeConfiguration<EbillingRule>, INtmsMapping
+    public class EbillingRuleConfiguration : IEntityTypeConfiguration<EbillingRule>, INtmsMapping
     {
         public void Configure(EntityTypeBuilder<EbillingRule> builder)
         {
 
-            builder.ToTable("EBillingRules","dbo");
-
             builder.HasKey(e => e.Id).HasName("PK_dbo.EBillingRules");
+
+            builder.ToTable("EBillingRules");
 
             builder.Property(e => e.DemandCharge).HasColumnType("decimal(18, 2)");
             builder.Property(e => e.MinimumCharge).HasColumnType("decimal(18, 2)");
@@ -22,5 +22,7 @@ namespace NTMS.DAL.EntityMappingConfiguration
             builder.Property(e => e.ServiceCharge).HasColumnType("decimal(18, 2)");
             builder.Property(e => e.Vat).HasColumnType("decimal(18, 2)");
         }
+
+
     }
 }
